@@ -1,4 +1,7 @@
+import time
 import tkinter as tk
+from screen import record_screen
+import multiprocessing
 
 
 class Interface(object):
@@ -91,8 +94,13 @@ class Interface(object):
 
     def on_capture_record(self):
         print("Recording...")
+        self.sidebar.destroy()
+        self.root.after(500, self._close_gui_and_start_recording)
+
+    def _close_gui_and_start_recording(self):
         self.root.quit()
         self.root.destroy()
+        multiprocessing.Process(target=record_screen, args=("test.mp4", 20)).start()
 
     def on_capture_window(self):
         """Handle full-screen capture logic here."""
