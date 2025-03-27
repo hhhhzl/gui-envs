@@ -13,7 +13,5 @@ pip install -r requirements.txt
 
 ### Run Recording
 ```
-cd src
-cd record
-python gui.py
+python record.py --o=all --d=social_media --td=send_a_message
 ```
