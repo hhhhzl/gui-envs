@@ -1,5 +1,6 @@
 import tkinter as tk
-from record import record_keyboard, record_screen, record
+from record import record_keyboard, record_screen
+from record import record
 import multiprocessing
 
 
