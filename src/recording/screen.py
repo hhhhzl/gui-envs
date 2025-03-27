@@ -66,6 +66,5 @@ class ScreenRecorder(object):
             self.out.release()
             cv2.destroyAllWindows()
 
-
-if __name__ == "__main__":
-    ScreenRecorder("test.mp4").start()
+    def write_record(self):
+        pass

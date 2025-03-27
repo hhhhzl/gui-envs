@@ -1,19 +1,26 @@
 import tkinter as tk
-from record import record_keyboard, record_screen
-from record import record
 import multiprocessing
+import os
+from src.recording.recorder import Recorder
+from src.utils import abspath
 
 
 class Interface(object):
     MODE = {
-        'all': record,
+        'both': record,
         'screen': record_screen,
         'keyboard': record_keyboard
     }
 
-    def __init__(self, mode='all'):
+    def __init__(self, domain=None, task_description=None, path=abspath('data'), mode='both'):
         assert mode in self.MODE
+        assert (os.path.exists(path))
+
         self.call_back = self.MODE[mode]
+        self.domain = domain
+        self.task_description = task_description
+        self.path = path
+
         self.root = tk.Tk()
         self.root.withdraw()
         self.root.overrideredirect(True)
@@ -107,7 +114,7 @@ class Interface(object):
     def _close_gui_and_start_recording(self):
         self.root.quit()
         self.root.destroy()
-        multiprocessing.Process(target=self.call_back).start()
+        multiprocessing.Process(target=self.call_back, args=()).start()
 
     def on_capture_window(self):
         """Handle full-screen capture logic here."""
