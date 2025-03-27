@@ -30,9 +30,11 @@ class ScreenRecorder(object):
         self.resolution = (actual_width, actual_height)
         self.filename = filename
         self.fps = fps
-        self.time_offset = None
+        self.time_offset = time.time() - self.start_time
         fourcc = cv2.VideoWriter.fourcc(*"mp4v")
         self.out = cv2.VideoWriter(self.filename, fourcc, fps, self.resolution)
+        self.frames = 0
+        self.duration = 0
 
         if mkr is None:
             self.mkr = MouseKeyRecorder()
@@ -46,6 +48,7 @@ class ScreenRecorder(object):
             try:
                 print("Screen Recording Start........")
                 print("Press ESC to stop Recording")
+                self.time_offset = time.time() - self.start_time
                 while True:
                     screenshot = self.sct.grab(self.monitor)
                     frame = np.array(screenshot)
@@ -57,6 +60,7 @@ class ScreenRecorder(object):
         else:
             print("Screen Recording Start........")
             print("Press ESC to stop Recording")
+            self.time_offset = time.time() - self.start_time
             while not self.mkr.stop_recording:
                 screenshot = self.sct.grab(self.monitor)
                 frame = np.array(screenshot)
@@ -65,6 +69,15 @@ class ScreenRecorder(object):
 
             self.out.release()
             cv2.destroyAllWindows()
+            print("Recorded Screen Saved.")
 
     def write_record(self):
-        pass
+        cap = cv2.VideoCapture(self.filename)
+        if not cap.isOpened():
+            return
+        else:
+            self.frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+            self.fps = cap.get(cv2.CAP_PROP_FPS)
+            if self.fps > 0:
+                self.duration = self.frames / self.fps
+        cap.release()

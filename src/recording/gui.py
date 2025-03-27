@@ -8,18 +8,9 @@ from src.utils import abspath
 class Interface(object):
     def __init__(self, domain=None, task_description=None, path=abspath('data'), mode='both'):
         assert (os.path.exists(path))
-
-
         self.domain = domain
         self.task_description = task_description
         self.path = path
-        self.call_back_class = RecorderEngine(
-            domain=self.domain,
-            task_description=self.task_description,
-            path=self.path,
-            option=mode
-        )
-        self.call_back_f = self.call_back_class.start
 
         self.root = tk.Tk()
         self.root.withdraw()
@@ -81,6 +72,16 @@ class Interface(object):
         )
         self.btn_record.pack(side="left", padx=20, pady=10)
         self._enable_sidebar_move()
+        self.call_back_class = RecorderEngine(
+            domain=self.domain,
+            task_description=self.task_description,
+            path=self.path,
+            option=mode
+        )
+        self.call_back_f = self.call_back_class.start
+        self.screen_width = self.root.winfo_screenwidth()
+        self.screen_height = self.root.winfo_screenheight()
+        self.selected_area = None
 
     def start(self):
         self.root.mainloop()
@@ -130,9 +131,7 @@ class Interface(object):
         overlay.overrideredirect(True)
 
         # Get screen dimensions
-        screen_width = self.root.winfo_screenwidth()
-        screen_height = self.root.winfo_screenheight()
-        overlay.geometry(f"{screen_width}x{screen_height}+0+0")
+        overlay.geometry(f"{self.screen_width}x{self.screen_height}+0+0")
         overlay.attributes('-alpha', 0.2)
 
         # Create a Canvas that fills the overlay
@@ -171,13 +170,15 @@ class Interface(object):
             if rect_id[0] is not None:
                 x1, y1, x2, y2 = canvas.coords(rect_id[0])
                 print(f"Selected rectangle = ({x1}, {y1}) to ({x2}, {y2})")
+                self.selected_area = {}
+                self.selected_area['x1'] = x1
+                self.selected_area['y1'] = y1
+                self.selected_area['x2'] = x2
+                self.selected_area['y2'] = y2
+                self.call_back_class.selected_area = self.selected_area
 
             overlay.destroy()
 
         canvas.bind("<Button-1>", on_mouse_down)
         canvas.bind("<B1-Motion>", on_mouse_drag)
         canvas.bind("<ButtonRelease-1>", on_mouse_up)
-
-
-if __name__ == "__main__":
-    Interface().start()
