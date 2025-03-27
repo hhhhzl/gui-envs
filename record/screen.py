@@ -1,45 +1,71 @@
 import cv2
 import numpy as np
 import mss
-from pynput import keyboard
-
-stop_recording = False
-
-
-def on_press(key):
-    global stop_recording
-    if key == keyboard.Key.esc:
-        stop_recording = True
-        return False
+import time
+from mouse_key import MouseKeyRecorder
 
 
-def record_screen(filename, fps=20):
-    listener = keyboard.Listener(on_press=on_press)
-    listener.start()
-    with mss.mss() as sct:
-        monitor = sct.monitors[1]
-        screenshot = sct.grab(monitor)
+class ScreenRecorder(object):
+    def __init__(
+            self,
+            filename,
+            fps=20,
+            monitor=0,
+            start_time=None,
+            mkr: MouseKeyRecorder = None
+    ):
+        if start_time is None:
+            self.start_time = time.time()
+        else:
+            self.start_time = start_time
+
+        self.sct = mss.mss()
+        self.monitor = self.sct.monitors[monitor]
+        self.monitor_index = monitor
+        self.screen_size = self.monitor
+        screenshot = self.sct.grab(self.monitor)
         frame = np.array(screenshot)
         frame = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
-
-        # Actual pixel dimensions
         actual_height, actual_width = frame.shape[:2]
-        resolution = (actual_width, actual_height)
-        print(resolution)
-
+        self.resolution = (actual_width, actual_height)
+        self.filename = filename
+        self.fps = fps
+        self.time_offset = None
         fourcc = cv2.VideoWriter.fourcc(*"mp4v")
-        out = cv2.VideoWriter(filename, fourcc, fps, resolution)
+        self.out = cv2.VideoWriter(self.filename, fourcc, fps, self.resolution)
 
-        while not stop_recording:
-            screenshot = sct.grab(monitor)
-            frame = np.array(screenshot)
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
-            out.write(frame)
+        if mkr is None:
+            self.mkr = MouseKeyRecorder()
+            self.mkr.keyboard_listener.start()
+        else:
+            self.mkr = mkr
 
-        out.release()
-        cv2.destroyAllWindows()
-        listener.stop()
+    def start(self):
+        if self.mkr is None:
+            print("Control + C to stop Recording")
+            try:
+                print("Screen Recording Start........")
+                print("Press ESC to stop Recording")
+                while True:
+                    screenshot = self.sct.grab(self.monitor)
+                    frame = np.array(screenshot)
+                    frame = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
+                    self.out.write(frame)
+            except KeyboardInterrupt:
+                self.out.release()
+                cv2.destroyAllWindows()
+        else:
+            print("Screen Recording Start........")
+            print("Press ESC to stop Recording")
+            while not self.mkr.stop_recording:
+                screenshot = self.sct.grab(self.monitor)
+                frame = np.array(screenshot)
+                frame = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
+                self.out.write(frame)
+
+            self.out.release()
+            cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":
-    record_screen("test.mp4", 20)
+    ScreenRecorder("test.mp4").start()

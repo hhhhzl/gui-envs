@@ -1,17 +1,23 @@
-import time
 import tkinter as tk
-from screen import record_screen
+from record import record_keyboard, record_screen, record
 import multiprocessing
 
 
 class Interface(object):
+    MODE = {
+        'all': record,
+        'screen': record_screen,
+        'keyboard': record_keyboard
+    }
 
-    def __init__(self):
+    def __init__(self, mode='all'):
+        assert mode in self.MODE
+        self.call_back = self.MODE[mode]
         self.root = tk.Tk()
         self.root.withdraw()
+        self.root.overrideredirect(True)
 
         self.sidebar = tk.Toplevel()
-        self.sidebar.overrideredirect(True)
         self.sidebar.attributes('-topmost', True)
         self.sidebar.geometry("450x50+500+700")
         self.sidebar.attributes('-alpha', 0.9)
@@ -100,7 +106,7 @@ class Interface(object):
     def _close_gui_and_start_recording(self):
         self.root.quit()
         self.root.destroy()
-        multiprocessing.Process(target=record_screen, args=("test.mp4", 20)).start()
+        multiprocessing.Process(target=self.call_back).start()
 
     def on_capture_window(self):
         """Handle full-screen capture logic here."""
