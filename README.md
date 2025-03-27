@@ -1,7 +1,7 @@
 # GUI Utils
 
 ---
-[🎥 Record Demo](https://drive.google.com/uc?export=download&id=1cPfPEekM_1bVcv7dUKJLevVXVmIMoZ8k)
+https://github.com/user-attachments/assets/e6c6a6df-a622-47a0-a750-548099a693de
 
 ### Install
 
