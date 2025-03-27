@@ -29,7 +29,7 @@ class MouseKeyRecorder(object):
         self.keyboard_listener.start()
 
     def write_record(self, path, file_name):
-        with open(f"{path}/keyboard/{file_name}.txt", 'w') as f:
+        with open(f"{path}/{file_name}.txt", 'w') as f:
             for ev in self.events:
                 f.write(str(ev) + "\n")
         f.close()

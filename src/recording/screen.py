@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import mss
 import time
-from mouse_key import MouseKeyRecorder
+from src.recording.mouse_key import MouseKeyRecorder
 
 
 class ScreenRecorder(object):
