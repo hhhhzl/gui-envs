@@ -2,6 +2,8 @@
 
 ---
 
+![Video](/assets/gui_demo.mp4)
+
 ### Install
 
  - MacOS

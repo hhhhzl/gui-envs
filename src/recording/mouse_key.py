@@ -29,10 +29,14 @@ class MouseKeyRecorder(object):
         self.keyboard_listener.start()
 
     def write_record(self, path, file_name):
-        with open(f"{path}/{file_name}.txt", 'w') as f:
-            for ev in self.events:
-                f.write(str(ev) + "\n")
-        f.close()
+        try:
+            with open(f"{path}/{file_name}.txt", 'w') as f:
+                for ev in self.events:
+                    f.write(str(ev) + "\n")
+            f.close()
+            print("Keyboards Actions Saved")
+        except Exception as e:
+            print(f"Keyboards Actions Save Failed: {str(e)}")
 
     def __on_move(self, x, y):
         t = time.time() - self.start_time
