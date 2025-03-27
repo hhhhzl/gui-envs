@@ -3,9 +3,10 @@ from src.recording.mouse_key import MouseKeyRecorder
 from src.utils import abspath
 import time
 from abc import ABC, abstractmethod
+import os
 
 
-class Recorder(ABC):
+class RecorderEngine(ABC):
     OPTION = ['both', 'screen', 'keyboard']
 
     def __init__(
@@ -13,23 +14,22 @@ class Recorder(ABC):
             option='both',
             domain=None,
             task_description=None,
-            path=abspath("data")
+            path=abspath("data"),
     ):
         assert(option in self.OPTION)
         self.domain = domain
         self.task_description = task_description
         self.path = path
         self.option = option
+        self.mc = None
+        self.sc = None
 
-    @abstractmethod
+        for folder in ['video', 'mapping', 'keyboard']:
+            exists = os.path.exists(f"{self.path}/{folder}")
+            if not exists:
+                os.makedirs(f"{self.path}/{folder}")
+
     def start(self):
-        pass
-
-    @abstractmethod
-    def write_record(self, **kwargs):
-        pass
-
-    def record(self):
         if self.option == 'both':
             self.__record_both()
         elif self.option == 'screen':
@@ -37,23 +37,33 @@ class Recorder(ABC):
         elif self.option == 'keyboard':
             self.__record_keyboard()
 
+    def write_record(self, **kwargs):
+        pass
+
     def __record_both(self):
         start_time = time.time()
+        file_name = f"{int(start_time * 1000)}"
+
         # define keyboard and mouse
-        mc = MouseKeyRecorder(start_time=start_time)
-        sc = ScreenRecorder(filename=f'{"test"}.mp4', start_time=start_time, mkr=mc)
-        mc.start()
-        sc.start()
+        self.mc = MouseKeyRecorder(start_time=start_time)
+        self.sc = ScreenRecorder(filename=f'{self.path}/video/{file_name}.mp4', start_time=start_time, mkr=self.mc)
+        self.mc.start()
+        self.sc.start()
 
         print("\nRecording stopped.")
-        mc.write_record(self.path, "test")
+        self.mc.write_record(path=f'{self.path}/keyboard', file_name=file_name)
         print("Done. Events saved to")
 
     def __record_screen(self):
-        ScreenRecorder(filename='test.mp4').start()
+        start_time = time.time()
+        file_name = f"{int(start_time * 1000)}"
+        self.sc = ScreenRecorder(filename=f'{self.path}/video/{file_name}.mp4').start()
 
     def __record_keyboard(self):
-        mc = MouseKeyRecorder().start()
+        start_time = time.time()
+        file_name = f"{int(start_time * 1000)}"
+        self.mc = MouseKeyRecorder().start()
+        self.mc.write_record(path=f'{self.path}/keyboard', file_name=file_name)
 
 
 
