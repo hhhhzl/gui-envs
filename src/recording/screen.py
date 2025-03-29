@@ -9,7 +9,7 @@ class ScreenRecorder(object):
     def __init__(
             self,
             filename,
-            fps=20,
+            fps=30,
             monitor=0,
             start_time=None,
             mkr: MouseKeyRecorder = None
