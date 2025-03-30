@@ -1,6 +1,6 @@
 import time
 from pynput import mouse, keyboard
-
+import numpy as np
 
 class MouseKeyRecorder(object):
     def __init__(self, start_time=None):
@@ -29,6 +29,10 @@ class MouseKeyRecorder(object):
         self.keyboard_listener.start()
 
     def write_record(self, path, file_name):
+        timestamps = np.array([event[0] for event in self.events])
+        diffs = np.diff(timestamps, prepend=self.start_time)
+        for event, diff in zip(self.events, diffs):
+            event.append(diff)
         try:
             with open(f"{path}/{file_name}.txt", 'w') as f:
                 for ev in self.events:
@@ -40,16 +44,16 @@ class MouseKeyRecorder(object):
 
     def __on_move(self, x, y):
         t = time.time() - self.start_time
-        self.events.append((time.time(), t, 'MOVE', x, y))
+        self.events.append([time.time(), 'MOVE', x, y])
 
     def __on_click(self, x, y, button, pressed):
         t = time.time() - self.start_time
         action = 'PRESSED' if pressed else 'RELEASED'
-        self.events.append((time.time(), t, f'MOUSE_{action}', x, y, str(button)))
+        self.events.append([time.time(), f'MOUSE_{action}', x, y, str(button)])
 
     def __on_scroll(self, x, y, dx, dy):
         t = time.time() - self.start_time
-        self.events.append((time.time(), t, 'SCROLL', x, y, dx, dy))
+        self.events.append([time.time(), 'SCROLL', x, y, dx, dy])
 
     def __on_press(self, key):
         t = time.time() - self.start_time
@@ -57,13 +61,13 @@ class MouseKeyRecorder(object):
             self.ending_time = time.time()
             self.stop_recording = True
         try:
-            self.events.append((time.time(), t, 'KEY_DOWN', key.char))
+            self.events.append([time.time(), 'KEY_DOWN', key.char])
         except AttributeError:
-            self.events.append((time.time(), t, 'KEY_DOWN', str(key)))
+            self.events.append([time.time(), 'KEY_DOWN', str(key)])
 
     def __on_release(self, key):
         t = time.time() - self.start_time
         try:
-            self.events.append((time.time(), t, 'KEY_UP', key.char))
+            self.events.append([time.time(), 'KEY_UP', key.char])
         except AttributeError:
-            self.events.append((time.time(), t, 'KEY_UP', str(key)))
+            self.events.append([time.time(), 'KEY_UP', str(key)])

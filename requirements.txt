@@ -3,3 +3,4 @@ PyAutoGUI~=0.9.54
 PyGetWindow~=0.0.9
 pynput~=1.7.6
 numpy~=1.26.4
+gym==0.26.2
