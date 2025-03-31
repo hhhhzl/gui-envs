@@ -1,6 +1,6 @@
 import time
 from pynput import mouse, keyboard
-import numpy as np
+
 
 class MouseKeyRecorder(object):
     def __init__(self, start_time=None):
@@ -29,10 +29,6 @@ class MouseKeyRecorder(object):
         self.keyboard_listener.start()
 
     def write_record(self, path, file_name):
-        timestamps = np.array([event[0] for event in self.events])
-        diffs = np.diff(timestamps, prepend=self.start_time)
-        for event, diff in zip(self.events, diffs):
-            event.append(diff)
         try:
             with open(f"{path}/{file_name}.txt", 'w') as f:
                 for ev in self.events:
