@@ -48,7 +48,8 @@ class RecorderEngine(ABC):
             "domain": self.domain,
             "task_description": self.task_description,
             "path": self.path,
-            "start_time": self.start_time
+            "start_time": self.start_time,
+            "finished": None, # human labeled data
         }
         if self.sc:
             mapping['video'] = {

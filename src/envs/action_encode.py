@@ -1,11 +1,20 @@
 import numpy as np
 
-EVENT_TYPES = ["MOVE", "MOUSE_PRESSED", "MOUSE_RELEASED", "SCROLL", "KEY_DOWN", "KEY_UP"]
+EVENT_TYPES = [
+    "MOVE",
+    "MOUSE_PRESSED",
+    "MOUSE_RELEASED",
+    "SCROLL",
+    "KEY_DOWN",
+    "KEY_UP"
+]
 
 
-def one_hot_encode_event(event):
+def one_hot_encode_event(event, max_time, start_time):
     event_type = event[1]
+    delta_t = event[0] - start_time
 
+    # One-hot encoding for action type
     action_vector = np.zeros(len(EVENT_TYPES))
     action_vector[EVENT_TYPES.index(event_type)] = 1
 
@@ -21,4 +30,5 @@ def one_hot_encode_event(event):
     elif "KEY" in event_type:
         key_button = hash(event[2]) % 1000  # Encode key uniquely
 
-    return np.concatenate((action_vector, [event[-1], x, y, dx, dy, key_button]))
+    # Concatenate one-hot encoding with other features
+    return np.concatenate((action_vector, [delta_t, x, y, dx, dy, key_button]))
