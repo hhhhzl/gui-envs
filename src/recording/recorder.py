@@ -16,7 +16,7 @@ class RecorderEngine(ABC):
             option='both',
             domain=None,
             task_description=None,
-            path=abspath("data"),
+            path=abspath("metadata"),
             selected_area=None,
     ):
         assert(option in self.OPTION)
