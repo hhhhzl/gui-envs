@@ -7,6 +7,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run Screen Recording.')
     parser.add_argument('--o', type=str, default='both',
                         help='Recording Option: both, screen, keyboard.')
+    parser.add_argument('--a', type=str, default='both',
+                        help='Recording Option: both, screen, keyboard.')
     parser.add_argument('--d', type=str, default=None,
                         help='Recording Domain')
     parser.add_argument('--td', type=str, default=None,
@@ -18,6 +20,7 @@ if __name__ == '__main__':
     Interface(
         domain=args.d,
         task_description=args.td,
+        app=args.a,
         mode=args.o,
         path=args.path
     ).start()

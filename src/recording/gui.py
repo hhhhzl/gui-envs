@@ -6,11 +6,12 @@ from src.utils import abspath
 
 
 class Interface(object):
-    def __init__(self, domain=None, task_description=None, path=abspath('data'), mode='both'):
+    def __init__(self, domain=None, task_description=None, path=abspath('metadata'), mode='both', app=None):
         assert (os.path.exists(path))
         self.domain = domain
         self.task_description = task_description
         self.path = path
+        self.app = app
 
         self.root = tk.Tk()
         self.root.withdraw()
@@ -75,6 +76,7 @@ class Interface(object):
         self.call_back_class = RecorderEngine(
             domain=self.domain,
             task_description=self.task_description,
+            app=self.app,
             path=self.path,
             option=mode
         )
