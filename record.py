@@ -13,7 +13,7 @@ if __name__ == '__main__':
                         help='Recording Domain')
     parser.add_argument('--td', type=str, default=None,
                         help='Task Description')
-    parser.add_argument('--path', type=str, default=abspath('data'),
+    parser.add_argument('--path', type=str, default=abspath('metadata'),
                         help='Path to Store Data')
     args = parser.parse_args()
 

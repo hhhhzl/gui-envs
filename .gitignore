@@ -4,7 +4,7 @@ __pycache__
 .idea
 .DS_Store
 
-/data
+/metadata
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
