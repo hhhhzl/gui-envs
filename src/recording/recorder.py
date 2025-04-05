@@ -16,7 +16,8 @@ class RecorderEngine(ABC):
             option='both',
             domain=None,
             task_description=None,
-            path=abspath("data"),
+            path=abspath("metadata"),
+            app=None,
             selected_area=None,
     ):
         assert(option in self.OPTION)
@@ -24,6 +25,7 @@ class RecorderEngine(ABC):
         self.task_description = task_description
         self.path = path
         self.option = option
+        self.app = app
         self.mc: Optional[MouseKeyRecorder] = None
         self.sc: Optional[ScreenRecorder] = None
         self.selected_area = selected_area
@@ -48,6 +50,7 @@ class RecorderEngine(ABC):
             "domain": self.domain,
             "task_description": self.task_description,
             "path": self.path,
+            "app": self.app,
             "start_time": self.start_time,
             "finished": None, # human labeled data
         }
