@@ -72,7 +72,7 @@ class StateEmbedding(gym.ObservationWrapper):
     """
 
     def __init__(self, env, embedding_name=None, device='cuda', load_path="", proprio=0, camera_name=None,
-                 env_name=None):
+                 env_name=None, language=True):
         gym.ObservationWrapper.__init__(self, env)
 
         self.proprio = proprio
@@ -114,7 +114,7 @@ class StateEmbedding(gym.ObservationWrapper):
         embedding.to(device=device)
 
         self.embedding, self.embedding_dim = embedding, embedding_dim
-        self.observation_space = Box(low=-np.inf, high=np.inf, shape=(self.embedding_dim + self.proprio,))
+        self.observation_space = Box(low=-np.inf, high=np.inf, shape=(self.embedding_dim + self.proprio + 768 if language else 0,))
 
     def observation(self, observation):
         # INPUT SHOULD BE [0,255]
