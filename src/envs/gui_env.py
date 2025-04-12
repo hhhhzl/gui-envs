@@ -139,7 +139,7 @@ class StateEmbedding(gym.ObservationWrapper):
         else:
             return observation
 
-    def encode_batch(self, obs, finetune=False):
+    def encode_batch(self, obs, finetune=False, return_numpy=True):
         # INPUT SHOULD BE [0,255]
         inp = []
         for o in obs:
@@ -153,8 +153,8 @@ class StateEmbedding(gym.ObservationWrapper):
             emb = self.embedding(inp).view(-1, self.embedding_dim)
         else:
             with torch.no_grad():
-                emb = self.embedding(inp).view(-1, self.embedding_dim).to('cpu').numpy().squeeze()
-        return emb
+                emb = self.embedding(inp).view(-1, self.embedding_dim)
+        return emb.cpu().numpy().squeeze() if return_numpy else emb
 
     def get_obs(self):
         if self.embedding is not None:
