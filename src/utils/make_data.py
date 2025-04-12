@@ -213,7 +213,7 @@ def get_video_frames_and_timestamps(video_path: str, initial_unix_timestamp: flo
         if not ret:
             break
 
-        frame = cv2.resize(frame, (224, 224), interpolation=cv2.INTER_AREA)
+        frame = cv2.resize(frame, (256, 256), interpolation=cv2.INTER_AREA)
         frames.append(frame)
         video_timestamps_ms.append(cap.get(cv2.CAP_PROP_POS_MSEC))
 
@@ -316,9 +316,9 @@ def process_single_file(filename: str, path: str) -> Optional[Dict[str, np.ndarr
         # Convert to numpy arrays more efficiently
         return {
             'images': np.array(states),
-            'observations': np.full(len(states), task),
+            'observations': task,
             'actions': np.array(actions),
-            'finished': np.full(len(states), finished)
+            'finished': finished
         }
     except Exception as e:
         print(f"Error processing {filename}: {str(e)}")
@@ -327,6 +327,7 @@ def process_single_file(filename: str, path: str) -> Optional[Dict[str, np.ndarr
 
 def make_dataset():
     """Optimized dataset creation with multiprocessing."""
+    # hhhhzl/EduGetRicher/CMU/projects/GUI-VDILA/src/gui-envs
     path = '/Users/zhilinhe/Desktop/hhhhzl/EduGetRicher/CMU/projects/GUI-VDILA/src/gui-envs/metadata/mapping'
     json_files = [f for f in os.listdir(path) if f.endswith(".json")]
 
@@ -340,7 +341,7 @@ def make_dataset():
 
     demo_path = [result for result in results if result is not None]
 
-    with open('gui_demo_p.pickle', 'wb') as handle:
+    with open('gui_demo_p_v2.pickle', 'wb') as handle:
         pickle.dump(demo_path, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
