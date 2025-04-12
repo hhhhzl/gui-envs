@@ -39,7 +39,7 @@ def cleanup_config(cfg):
     for key in list(keys):
         if key not in VALID_ARGS:
             del config.agent[key]
-    config.agent["_target_"] = "r3m.R3M"
+    config.agent["_target_"] = "src.pvrs.models.r3m.r3m.R3M"
     config["device"] = device
 
     ## Hardcodes to remove the language head
