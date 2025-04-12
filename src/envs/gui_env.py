@@ -12,12 +12,89 @@ import torchvision.models as models
 import torchvision.transforms as T
 from PIL import Image
 from gym import spaces
+import os
+from os.path import expanduser
+import hydra
+import gdown
+import copy
 
 
 def init(module, weight_init, bias_init, gain=1):
     weight_init(module.weight.data, gain=gain)
     bias_init(module.bias.data)
     return module
+
+
+VALID_ARGS = ["_target_", "device", "lr", "hidden_dim", "size", "l2weight", "l1weight", "langweight", "tcnweight",
+              "l2dist", "bs"]
+if torch.cuda.is_available():
+    device = "cuda"
+else:
+    device = "cpu"
+
+
+def cleanup_config(cfg):
+    config = copy.deepcopy(cfg)
+    keys = config.agent.keys()
+    for key in list(keys):
+        if key not in VALID_ARGS:
+            del config.agent[key]
+    config.agent["_target_"] = "r3m.R3M"
+    config["device"] = device
+
+    ## Hardcodes to remove the language head
+    ## Assumes downstream use is as visual representation
+    config.agent["langweight"] = 0
+    return config.agent
+
+
+def remove_language_head(state_dict):
+    keys = state_dict.keys()
+    ## Hardcodes to remove the language head
+    ## Assumes downstream use is as visual representation
+    for key in list(keys):
+        if ("lang_enc" in key) or ("lang_rew" in key):
+            del state_dict[key]
+    return state_dict
+
+
+def load_r3m_reproduce(modelid):
+    home = os.path.join(expanduser("~"), ".r3m")
+    if modelid == "r3m":
+        foldername = "original_r3m"
+        modelurl = 'https://drive.google.com/uc?id=1jLb1yldIMfAcGVwYojSQmMpmRM7vqjp9'
+        configurl = 'https://drive.google.com/uc?id=1cu-Pb33qcfAieRIUptNlG1AQIMZlAI-q'
+    elif modelid == "r3m_noaug":
+        foldername = "original_r3m_noaug"
+        modelurl = 'https://drive.google.com/uc?id=1k_ZlVtvlktoYLtBcfD0aVFnrZcyCNS9D'
+        configurl = 'https://drive.google.com/uc?id=1hPmJwDiWPkd6GGez6ywSC7UOTIX7NgeS'
+    elif modelid == "r3m_nol1":
+        foldername = "original_r3m_nol1"
+        modelurl = 'https://drive.google.com/uc?id=1LpW3aBMdjoXsjYlkaDnvwx7q22myM_nB'
+        configurl = 'https://drive.google.com/uc?id=1rZUBrYJZvlF1ReFwRidZsH7-xe7csvab'
+    elif modelid == "r3m_nolang":
+        foldername = "original_r3m_nolang"
+        modelurl = 'https://drive.google.com/uc?id=1FXcniRei2JDaGMJJ_KlVxHaLy0Fs_caV'
+        configurl = 'https://drive.google.com/uc?id=192G4UkcNJO4EKN46ECujMcH0AQVhnyQe'
+    else:
+        raise NameError('Invalid Model ID')
+
+    if not os.path.exists(os.path.join(home, foldername)):
+        os.makedirs(os.path.join(home, foldername))
+    modelpath = os.path.join(home, foldername, "model.pt")
+    configpath = os.path.join(home, foldername, "config.yaml")
+    if not os.path.exists(modelpath):
+        gdown.download(modelurl, modelpath, quiet=False)
+        gdown.download(configurl, configpath, quiet=False)
+
+    modelcfg = omegaconf.OmegaConf.load(configpath)
+    cleancfg = cleanup_config(modelcfg)
+    rep = hydra.utils.instantiate(cleancfg)
+    rep = torch.nn.DataParallel(rep)
+    r3m_state_dict = remove_language_head(torch.load(modelpath, map_location=torch.device(device))['r3m'])
+
+    rep.load_state_dict(r3m_state_dict)
+    return rep
 
 
 def _get_embedding(embedding_name='resnet34', load_path="", *args, **kwargs):
@@ -92,7 +169,6 @@ class StateEmbedding(gym.ObservationWrapper):
                                          T.ToTensor(),  # ToTensor() divides by 255
                                          T.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
         elif load_path == "r3m":
-            from r3m import load_r3m_reproduce
             rep = load_r3m_reproduce("r3m")
             rep.eval()
             embedding_dim = rep.module.outdim
@@ -114,7 +190,8 @@ class StateEmbedding(gym.ObservationWrapper):
         embedding.to(device=device)
 
         self.embedding, self.embedding_dim = embedding, embedding_dim
-        self.observation_space = Box(low=-np.inf, high=np.inf, shape=(self.embedding_dim + self.proprio + 768 if language else 0,))
+        self.observation_space = Box(low=-np.inf, high=np.inf,
+                                     shape=(self.embedding_dim + self.proprio + 768 if language else 0,))
 
     def observation(self, observation):
         # INPUT SHOULD BE [0,255]
