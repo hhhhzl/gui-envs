@@ -220,9 +220,10 @@ class StateEmbedding(gym.ObservationWrapper):
         # INPUT SHOULD BE [0,255]
         inp = []
         for o in obs:
-            i = self.transforms(Image.fromarray(o.astype(np.uint8))).reshape(-1, 3, 224, 224)
+            # i = self.transforms(Image.fromarray(o.astype(np.uint8))).reshape(-1, 3, 224, 224)
+            i = self.transforms(o).unsqueeze(0)
             if "r3m" in self.load_path:
-                ## R3M Expects input to be 0-255, preprocess makes 0-1
+                # R3M Expects input to be 0-255, preprocess makes 0-1
                 i *= 255.0
             inp.append(i)
 
