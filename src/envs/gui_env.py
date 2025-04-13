@@ -220,7 +220,7 @@ class StateEmbedding(gym.ObservationWrapper):
     def encode_batch(self, obs, finetune=False, return_numpy=True):
         # INPUT SHOULD BE [0,255]
         inp = []
-        for o in tqdm(obs):
+        for o in obs:
             i = self.transforms(Image.fromarray(o.astype(np.uint8))).reshape(-1, 3, 224, 224)
             if "r3m" in self.load_path:
                 # R3M Expects input to be 0-255, preprocess makes 0-1
