@@ -2,13 +2,6 @@ import cv2
 from typing import List, Optional
 import subprocess
 import time
-from src.automations.automations import (
-    scroll_mouse,
-    click_mouse,
-    press_key,
-    release_key,
-    move_mouse_position
-)
 import gym
 
 
@@ -48,25 +41,6 @@ class RealSimulatorGUI(object):
         else:
             raise "Not a correct mode"
 
-    def __play_row_action(self, action, offset=0):
-        event_time, delta_t, event_type, *args = action
-        delta_t = delta_t - offset  # offset to the inference time
-        if delta_t < 0:
-            delta_t = 0
-
-        if event_type == "MOVE":
-            move_mouse_position(*args, delta_t)
-        elif event_type.startswith("MOUSE_"):
-            if 'press' in event_type.lower():
-                click_mouse(*args, True, delta_t)
-            else:
-                click_mouse(*args, False, delta_t)
-        elif event_type == "SCROLL":
-            scroll_mouse(*args, delta_t)
-        elif event_type == "KEY_DOWN":
-            press_key(*args, delta_t)
-        elif event_type == "KEY_UP":
-            release_key(*args, delta_t)
 
     def __run_play_back(self) -> None:
         """
@@ -74,7 +48,7 @@ class RealSimulatorGUI(object):
         :return:
         """
         for action in self.actions:
-            self.__play_row_action(action)
+            self.env.step(action)
 
     def __run_online(self, max_time=300) -> None:
         """

@@ -18,6 +18,15 @@ import hydra
 import gdown
 import copy
 from tqdm import tqdm
+import cv2
+from mss import mss
+from src.automations.automations import (
+    scroll_mouse,
+    click_mouse,
+    press_key,
+    release_key,
+    move_mouse_position
+)
 
 
 def init(module, weight_init, bias_init, gain=1):
@@ -40,7 +49,7 @@ def cleanup_config(cfg):
     for key in list(keys):
         if key not in VALID_ARGS:
             del config.agent[key]
-    config.agent["_target_"] = "src.pvrs.models.r3m.r3m.R3M"
+    config.agent["_target_"] = "src.embeddings.pvrs.r3m.R3M"
     config["device"] = device
 
     ## Hardcodes to remove the language head
@@ -233,7 +242,7 @@ class StateEmbedding(gym.ObservationWrapper):
             emb = self.embedding(inp).view(-1, self.embedding_dim)
         else:
             with torch.no_grad():
-                emb =  self.embedding(inp).view(-1, self.embedding_dim).to('cpu').numpy().squeeze()
+                emb = self.embedding(inp).view(-1, self.embedding_dim).to('cpu').numpy().squeeze()
         return emb
 
     def get_obs(self):
@@ -248,7 +257,7 @@ class StateEmbedding(gym.ObservationWrapper):
 
 
 class GUIPixelObs(gym.ObservationWrapper):
-    def __init__(self, env, width, height, camera_name, device_id=-1, depth=False, *args, **kwargs):
+    def __init__(self, env, width, height, camera_name, device_id=-1, depth=False, monitor=0, *args, **kwargs):
         gym.ObservationWrapper.__init__(self, env)
         self.observation_space = Box(low=0., high=255., shape=(3, width, height))
         self.action_space = Box(low=-np.inf, high=np.inf, shape=(1, 13))
@@ -257,22 +266,37 @@ class GUIPixelObs(gym.ObservationWrapper):
         self.camera_name = camera_name
         self.depth = depth
         self.device_id = device_id
-        if "v2" in env.spec.id:
-            self.get_obs = env._get_obs
+        self.sct = mss()
+        self.monitor = self.sct.monitors[monitor]
 
     def get_image(self):
-        if self.camera_name == "default":
-            print("Camera not supported")
-            assert (False)
-            img = self.sim.render(width=self.width, height=self.height, depth=self.depth,
-                                  device_id=self.device_id)
-        else:
-            img = self.sim.render(width=self.width, height=self.height, depth=self.depth,
-                                  camera_name=self.camera_name, device_id=self.device_id)
-        img = img[::-1, :, :]
-        return img
+        img = np.array(self.sct.grab(self.monitor))
+        return cv2.resize(img, (256, 256), interpolation=cv2.INTER_AREA)
 
     def observation(self, observation):
         # This function creates observations based on the current state of the environment.
         # Argument `observation` is ignored, but `gym.ObservationWrapper` requires it.
+        return self.get_image()
+
+    def step(self, action, offset=0):
+        event_time, delta_t, event_type, *args = action
+        delta_t = delta_t - offset  # offset to the inference time
+        if delta_t < 0:
+            delta_t = 0
+
+        if event_type == "MOVE":
+            move_mouse_position(*args, delta_t)
+        elif event_type.startswith("MOUSE_"):
+            if 'press' in event_type.lower():
+                click_mouse(*args, True, delta_t)
+            else:
+                click_mouse(*args, False, delta_t)
+        elif event_type == "SCROLL":
+            scroll_mouse(*args, delta_t)
+        elif event_type == "KEY_DOWN":
+            press_key(*args, delta_t)
+        elif event_type == "KEY_UP":
+            release_key(*args, delta_t)
+
+    def reset(self):
         return self.get_image()
