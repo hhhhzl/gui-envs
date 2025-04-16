@@ -261,7 +261,7 @@ class GUIPixelObs(gym.ObservationWrapper):
     def __init__(self, env, width, height, camera_name, device_id=-1, depth=False, monitor=0, *args, **kwargs):
         gym.ObservationWrapper.__init__(self, env)
         self.observation_space = Box(low=0., high=255., shape=(3, width, height))
-        self.action_space = Box(low=-np.inf, high=np.inf, shape=(1, 13))
+        self.action_space = Box(low=-np.inf, high=np.inf, shape=(13, ))
         self.width = width
         self.height = height
         self.camera_name = camera_name
