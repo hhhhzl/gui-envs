@@ -1,6 +1,6 @@
-from src.recording.screen import ScreenRecorder
-from src.recording.mouse_key import MouseKeyRecorder
-from src.utils import abspath
+from gui_envs.recording.screen import ScreenRecorder
+from gui_envs.recording.mouse_key import MouseKeyRecorder
+from gui_envs.utils import abspath
 import time
 from abc import ABC
 import os

@@ -1,8 +1,8 @@
 import tkinter as tk
 import multiprocessing
 import os
-from src.recording.recorder import RecorderEngine
-from src.utils import abspath
+from gui_envs.recording.recorder import RecorderEngine
+from gui_envs.utils import abspath
 
 
 class Interface(object):

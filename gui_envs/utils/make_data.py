@@ -14,7 +14,7 @@
 # import ast
 # import bisect
 # from tqdm import tqdm
-# from src.envs.action_encode import one_hot_encode_event
+# from gui_envs.envs.action_encode import one_hot_encode_event
 # import pickle
 #
 #
@@ -166,7 +166,7 @@ import numpy as np
 import ast
 import bisect
 from tqdm import tqdm
-from src.envs.action_encode import one_hot_encode_event
+from gui_envs.envs.action_encode import one_hot_encode_event
 import pickle
 from multiprocessing import Pool, cpu_count
 from functools import partial
@@ -327,7 +327,7 @@ def process_single_file(filename: str, path: str) -> Optional[Dict[str, np.ndarr
 
 def make_dataset():
     """Optimized dataset creation with multiprocessing."""
-    # hhhhzl/EduGetRicher/CMU/projects/GUI-VDILA/src/gui-envs
+    # hhhhzl/EduGetRicher/CMU/projects/GUI-VDILA/gui_envs/gui-envs
     path = '/Users/zhilinhe/Desktop/hhhhzl/EduGetRicher/CMU/projects/GUI-VDILA/src/gui-envs/metadata/mapping'
     json_files = [f for f in os.listdir(path) if f.endswith(".json")]
 

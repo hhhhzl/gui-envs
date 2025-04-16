@@ -20,7 +20,7 @@ import copy
 from tqdm import tqdm
 import cv2
 from mss import mss
-from src.automations.automations import (
+from gui_envs.automations.automations import (
     scroll_mouse,
     click_mouse,
     press_key,
@@ -49,7 +49,8 @@ def cleanup_config(cfg):
     for key in list(keys):
         if key not in VALID_ARGS:
             del config.agent[key]
-    config.agent["_target_"] = "src.embeddings.pvrs.r3m.R3M"
+    # config.agent["_target_"] = "gui_envs.embeddings.pvrs.r3m.R3M"
+    config.agent["_target_"] = "src.pvrs.models.r3m.r3m.R3M"
     config["device"] = device
 
     ## Hardcodes to remove the language head
@@ -271,7 +272,8 @@ class GUIPixelObs(gym.ObservationWrapper):
 
     def get_image(self):
         img = np.array(self.sct.grab(self.monitor))
-        return cv2.resize(img, (256, 256), interpolation=cv2.INTER_AREA)
+        img = cv2.resize(img, (256, 256), interpolation=cv2.INTER_AREA)
+        return img[:, :, :3]
 
     def observation(self, observation):
         # This function creates observations based on the current state of the environment.
@@ -297,6 +299,8 @@ class GUIPixelObs(gym.ObservationWrapper):
             press_key(*args, delta_t)
         elif event_type == "KEY_UP":
             release_key(*args, delta_t)
+
+        return self.get_image(), 0, False
 
     def reset(self):
         return self.get_image()
