@@ -35,3 +35,28 @@ def one_hot_encode_event(event, start_time):
         key_button = hash(event[2]) % 1000
 
     return np.concatenate((action_vector, [delta_t, x, y, dx, dy, key_button]))
+
+
+def convert_back(action):
+    action = np.array(action)[0]
+    event_probs = action[:len(EVENT_TYPES)]
+    print(event_probs)
+    params = action[len(EVENT_TYPES):]
+
+    # Get the most likely event type
+    event_idx = np.argmax(event_probs)
+    event_type = EVENT_TYPES[event_idx]
+
+    # Extract parameters
+    delta_t, x, y, dx, dy, key_button = params
+
+    result = {
+        "event_type": event_type,
+        "delta_t": delta_t,
+        "x": x,
+        "y": y,
+        "dx": dx,
+        "dy": dy,
+        "key": key_button
+    }
+    return result
