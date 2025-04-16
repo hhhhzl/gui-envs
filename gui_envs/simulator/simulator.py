@@ -1,9 +1,9 @@
 import gym
 import torch
-from src.simulator.monitor import RealSimulatorGUI
-from src.envs.gui_env import StateEmbedding, GUIPixelObs
-from src.envs.gym_env import GymEnv
-from src.simulator.agent import GUIAgent
+from gui_envs.simulator.monitor import RealSimulatorGUI
+from gui_envs.envs.gui_env import StateEmbedding, GUIPixelObs
+from gui_envs.envs.gym_env import GymEnv
+from gui_envs.simulator.agent import GUIAgent
 
 
 def env_constructor(
@@ -23,14 +23,6 @@ def env_constructor(
     # If pixel based will wrap in a pixel observation wrapper
     if pixel_based:
         e = gym.make(env_name)
-        # Wrap in pixel observation wrapper
-        e = GUIPixelObs(
-            e,
-            width=image_width,
-            height=image_height,
-            camera_name=camera_name,
-            device_id=render_gpu_id
-        )
         # Wrapper which encodes state in pretrained model
         e = StateEmbedding(
             e,
@@ -41,7 +33,15 @@ def env_constructor(
             camera_name=camera_name,
             env_name=env_name
         )
-        e = GymEnv(e)
+        # Wrap in pixel observation wrapper
+        e = GUIPixelObs(
+            e,
+            width=image_width,
+            height=image_height,
+            camera_name=camera_name,
+            device_id=render_gpu_id
+        )
+        # e = GymEnv(e)
     else:
         print("Only supports pixel based")
         assert (False)
@@ -66,7 +66,7 @@ if __name__ == "__main__":
         "gc": False
     }
     env = env_constructor(**env_input)
-    agent = GUIAgent("policy_338.pickle")
+    agent = GUIAgent("policy_338.pickle", "set status to meeting")
     simulator = RealSimulatorGUI(
         agent=agent,
         env=env,

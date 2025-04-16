@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import argparse
-from src.recording.gui import Interface
-from src.utils import abspath
+from gui_envs.recording.gui import Interface
+from gui_envs.utils import abspath
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run Screen Recording.')
