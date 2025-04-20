@@ -50,19 +50,26 @@ class RealSimulatorGUI(object):
         for action in self.actions:
             self.env.step(action)
 
-    def __run_online(self, max_time=300) -> None:
+    def __run_online(self, max_time=200) -> None:
         """
         RUN online with an env and agent policy
         :return:
         """
         state = self.env.reset()
         done = False
-        while not done or time.time() - self.start_time < max_time:
+        steps = 1
+        while not done and not time.time() - self.start_time >= max_time:
             start = time.time()
             state = self.env.env.observation(state)
             action = self.agent.act(state)
-            state, reward, done = self.env.step(action)
             inference_time = time.time() - start
+            state, reward, done = self.env.step(action)
+            action_time = time.time() - start
+            print(f"Step: {steps}, Inference time: {inference_time}, Action Time: {action_time}")
+            steps += 1
+
+        if time.time() - self.start_time < max_time:
+            print("Exceeding Time Limit. Failed")
 
         self.env.close()
 

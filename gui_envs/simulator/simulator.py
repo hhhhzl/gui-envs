@@ -66,7 +66,7 @@ if __name__ == "__main__":
         "gc": False
     }
     env = env_constructor(**env_input)
-    agent = GUIAgent("gui_envs/simulator/policy_113.pickle", "set status to meeting")
+    agent = GUIAgent("policy_113.pickle", "set status to meeting")
     simulator = RealSimulatorGUI(
         agent=agent,
         env=env,

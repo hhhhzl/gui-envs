@@ -270,15 +270,12 @@ class GUIPixelObs(gym.ObservationWrapper):
         self.camera_name = camera_name
         self.depth = depth
         self.device_id = device_id
-        self.monitor_index = monitor
-        # self.sct = mss.mss()
-        # self.monitor = self.sct.monitors[self.monitor_index]
+        self.sct = mss.mss()
+        self.monitor = self.sct.monitors[monitor]
 
     def get_image(self):
-        from PIL import ImageGrab
-        img = np.array(ImageGrab.grab())
-
         # img = np.array(self.sct.grab(self.monitor))
+        img = np.asarray(pyautogui.screenshot(region=[0, 0, 1440, 900]))
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
         img = cv2.resize(img, (256, 256), interpolation=cv2.INTER_AREA)
         img = img[:, :, :3]

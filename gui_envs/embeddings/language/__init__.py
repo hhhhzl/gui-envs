@@ -1,7 +1,8 @@
 import torch
 import torch.nn as nn
 from torch.nn.modules.activation import Sigmoid
-from transformers import AutoTokenizer, AutoModel, AutoConfig
+from transformers import AutoTokenizer, AutoModel, logging
+logging.set_verbosity_error()
 
 epsilon = 1e-8
 
