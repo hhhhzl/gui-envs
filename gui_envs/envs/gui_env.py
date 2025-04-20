@@ -1,6 +1,8 @@
 """
 Build on https://github.com/facebookresearch/r3m/blob/eval/evaluation/r3meval/utils/obs_wrappers.py
 """
+import time
+import pyautogui
 import numpy as np
 import gym
 from gym.spaces.box import Box
@@ -19,7 +21,7 @@ import gdown
 import copy
 from tqdm import tqdm
 import cv2
-from mss import mss
+import mss
 from gui_envs.automations.automations import (
     scroll_mouse,
     click_mouse,
@@ -27,6 +29,7 @@ from gui_envs.automations.automations import (
     release_key,
     move_mouse_position
 )
+from gui_envs.envs.action_encode import convert_back
 
 
 def init(module, weight_init, bias_init, gain=1):
@@ -267,40 +270,53 @@ class GUIPixelObs(gym.ObservationWrapper):
         self.camera_name = camera_name
         self.depth = depth
         self.device_id = device_id
-        self.sct = mss()
+        self.sct = mss.mss()
         self.monitor = self.sct.monitors[monitor]
 
     def get_image(self):
-        img = np.array(self.sct.grab(self.monitor))
+        # img = np.array(self.sct.grab(self.monitor))
+        img = np.asarray(pyautogui.screenshot(region=[0, 0, 1440, 900]))
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
         img = cv2.resize(img, (256, 256), interpolation=cv2.INTER_AREA)
-        return img[:, :, :3]
+        img = img[:, :, :3]
+        os.makedirs("screenshots", exist_ok=True)
+        cv2.imwrite(f"screenshots/screenshot_{time.strftime('%Y%m%d_%H%M%S')}.png", img)
+        return img
 
     def observation(self, observation):
         # This function creates observations based on the current state of the environment.
         # Argument `observation` is ignored, but `gym.ObservationWrapper` requires it.
         return self.get_image()
 
-    def step(self, action, offset=0):
-        event_time, delta_t, event_type, *args = action
-        delta_t = delta_t - offset  # offset to the inference time
-        if delta_t < 0:
-            delta_t = 0
+    def step(self, action):
+        action = convert_back(action)
+        print(action)
+        delta_t = max(0, float(action.get('delta_t', None)))
+        event_type = action.get('event_type', None)
+        x = int(action.get('x', None))
+        y = int(action.get('y', None))
+        dx = int(action.get('dx', None))
+        dy = int(action.get('dy', None))
+        key = int(action.get('key', None))
 
         if event_type == "MOVE":
-            move_mouse_position(*args, delta_t)
+            move_mouse_position(x, y, delta_t)
         elif event_type.startswith("MOUSE_"):
             if 'press' in event_type.lower():
-                click_mouse(*args, True, delta_t)
+                click_mouse(x, y, key, True, delta_t)
             else:
-                click_mouse(*args, False, delta_t)
+                click_mouse(x, y, key, False, delta_t)
         elif event_type == "SCROLL":
-            scroll_mouse(*args, delta_t)
+            scroll_mouse(x, y, dx, dy, delta_t)
         elif event_type == "KEY_DOWN":
-            press_key(*args, delta_t)
+            press_key(key, delta_t)
         elif event_type == "KEY_UP":
-            release_key(*args, delta_t)
+            release_key(key, delta_t)
+        elif event_type == "NULL":
+            time.sleep(delta_t if delta_t else 1)
 
-        return self.get_image(), 0, False
+        state = self.get_image()
+        return state, 0, False
 
     def reset(self):
         return self.get_image()

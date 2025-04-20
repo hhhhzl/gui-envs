@@ -1,11 +1,3 @@
-# Read the /data, make demonstrations expert_data.pt
-# expert_data:
-#       state: image state, frame
-#       next_state:
-#       other_state: physical state (mouse position, cpu usage.... etc)
-#       next_other_state:
-#       action: action vector
-#       ep_found_goal: whether achieved goal for this episode
 # from typing import Dict
 # import cv2
 # import os
@@ -172,7 +164,7 @@ from multiprocessing import Pool, cpu_count
 from functools import partial
 
 root_path = "/Users/zhilinhe/Desktop/hhhhzl/EduGetRicher/CMU/projects/"
-
+path = '/Users/zhilinhe/Desktop/hhhhzl/EduGetRicher/CMU/projects/GUI-VDILA/src/gui_envs/metadata/mapping'
 
 def find_closest_elements(arr1: List[float], arr2: List[float]) -> List[float]:
     """Optimized version of finding closest elements between two arrays using bisect."""
@@ -328,7 +320,6 @@ def process_single_file(filename: str, path: str) -> Optional[Dict[str, np.ndarr
 def make_dataset():
     """Optimized dataset creation with multiprocessing."""
     # hhhhzl/EduGetRicher/CMU/projects/GUI-VDILA/gui_envs/gui-envs
-    path = '/Users/zhilinhe/Desktop/hhhhzl/EduGetRicher/CMU/projects/GUI-VDILA/src/gui-envs/metadata/mapping'
     json_files = [f for f in os.listdir(path) if f.endswith(".json")]
 
     with Pool(processes=max(1, cpu_count() - 1)) as pool:

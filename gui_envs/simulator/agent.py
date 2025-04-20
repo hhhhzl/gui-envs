@@ -13,7 +13,6 @@ class GUIAgent:
         self.policy.model.eval()
         self.language_emb = LangEncoder(device='cuda' if torch.cuda.is_available() else "cpu")
         self.instruction = language_instruction
-        print(self.policy.n, self.policy.m, 15)
 
     def act(self, obs):
         if type(obs) is not torch.Tensor:
@@ -23,8 +22,6 @@ class GUIAgent:
             lang_emb = self.language_emb.forward(self.instruction)
             if type(lang_emb) is not torch.Tensor:
                 lang_emb = Variable(torch.from_numpy(lang_emb).float(), requires_grad=False)
-            print(obs.shape, lang_emb.shape)
-            breakpoint()
             obs = torch.cat([obs, lang_emb], -1)
 
         with torch.no_grad():
